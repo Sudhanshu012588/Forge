@@ -22,9 +22,6 @@ class ForgeCLI:
             self.console.print(Panel(str(e), title="Setup error", border_style="red"))
             raise SystemExit(1)
 
-    # ------------------------------------------------------------------
-    # UI helpers
-    # ------------------------------------------------------------------
 
     def banner(self):
         self.console.print(
@@ -64,10 +61,6 @@ class ForgeCLI:
 
         self.console.print(table)
 
-    # ------------------------------------------------------------------
-    # Main loop
-    # ------------------------------------------------------------------
-
     def run(self):
         self.banner()
 
@@ -88,7 +81,6 @@ class ForgeCLI:
             self.handle_prompt(prompt)
 
     def handle_prompt(self, prompt: str):
-        # --- 1. Plan -----------------------------------------------------
         try:
             with Status("Planning project...", console=self.console):
                 schema = self.writer.get_schema(prompt)
@@ -105,7 +97,6 @@ class ForgeCLI:
             self.console.print("[yellow]Cancelled.[/yellow]")
             return
 
-        # --- 2. Build ------------------------------------------------------
         builder = ProjectBuilder(schema.project_name, output_dir=self.output_dir)
         planned_files = builder.plan_files(schema)
 

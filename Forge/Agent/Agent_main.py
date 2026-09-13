@@ -5,16 +5,21 @@ from FilesCommand.FileCommand import explore
 from typing import TypedDict
 from Agent.Context import ForgeState
 from Agent.Agents import task_scheduler,prompt_refiner,task_executor
+from langchain_ollama import ChatOllama
 
 
 
 def main(api_key,path):
 
     MiddleMenPrompt = MiddleMen()
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-3.7-flash",
-        temperature=0,
-        google_api_key=api_key
+    # llm = ChatGoogleGenerativeAI(
+    #     model="gemini-3.7-flash",
+    #     temperature=0,
+    #     google_api_key=api_key
+    # )
+    llm = ChatOllama(
+        model="qwen3:8b",
+        temperature=0
     )
     ## Prompt Refiner
     graph_builder = StateGraph(ForgeState)
@@ -27,30 +32,34 @@ def main(api_key,path):
 
     graph = graph_builder.compile()
 
-    starting_prompt = input(
-        "What would you like Forge to do? ❯ "
-    )
+    # starting_prompt = input(
+    #     "What would you like Forge to do? ❯ "
+    # )
 
-    if starting_prompt.lower() == "exit":
-        return
+    # if starting_prompt.lower() == "exit":
+    #     return
 
     state = graph.invoke({
-        "user_prompt": starting_prompt,
+        "user_prompt": MiddleMenPrompt,
         "refined_prompt": "",
         "task_plan": "",
         "WrokingDirectory":path
 
     })
 
-    print("\nRefined Prompt:")
-    print(state["refined_prompt"])
+    # print("\nRefined Prompt:")
+    # print(state["refined_prompt"])
 
-    print("\nTask Plan:")
-    print(state["task_plan"])
+    # print("\nTask Plan:")
+    # print(state["task_plan"]);
 
+    Start = True
     while True:
-
-        user_input = input("\n❯ ")
+        if Start:
+            user_input = input("\nWhat would you like Forge to do?\n❯ ")
+            Start = False
+        else:
+            user_input = input("\n❯ ")
 
         if user_input.lower() == "exit":
             print("Thank You!")
@@ -68,7 +77,7 @@ def main(api_key,path):
         for task in state["task_plan"]["tasks"]:
             print(f"\nExecuting Task {task['id']}")
             print(task["description"])
-            result = task_executor(llm, task,state["WrokingDirectory"])
+            result = task_executor(llm, task,state)
             print(result.content)
             task["status"] = "completed"
         

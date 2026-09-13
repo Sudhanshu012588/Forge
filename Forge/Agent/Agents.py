@@ -38,7 +38,7 @@ def task_scheduler(llm, state: ForgeState):
     content = get_text(response)
     return {"task_plan": json.loads(content)}
 
-def prompt_refiner(llm,state:ForgeState,WorkingDirectory):
+def prompt_refiner(llm,state:ForgeState):
     prompt_enhancer_prompt = PromptEnhancer()
     response = llm.invoke([
         {
@@ -55,6 +55,7 @@ def prompt_refiner(llm,state:ForgeState,WorkingDirectory):
 
 @tool 
 def readCodeBase(path):
+    """Provided the path:string as. a paramter this function read the file in the location."""
     files = explore.invoke({"dir":path})
 
     file_list = "\n".join(f"- {file}" for file in files)
@@ -70,7 +71,7 @@ def readCodeBase(path):
     return prompt
 
 
-def task_executor(llm, task):
+def task_executor(llm, task,WorkingDirectory):
 
     tools = [explore,write_file,ls,mkdir,delete,run,touch,cd,readCodeBase]
     tool_map = {
